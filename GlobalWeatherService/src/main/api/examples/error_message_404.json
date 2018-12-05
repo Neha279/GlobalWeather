@@ -1,0 +1,6 @@
+{
+   "type": "System Error",
+   "status": "404",
+   "statusCode": "Resource Not Found",
+   "message": "The requested resource 'v1/example' was not found using the API method 'GET'."
+}

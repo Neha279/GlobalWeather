@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd">
+	<context:property-placeholder
+		location="properties/globalweather-${mule.envt}.properties" />
+	<http:listener-config name="weather-api-httpListenerConfig"
+		host="${http.host}" port="${http.port}" doc:name="HTTP Listener Configuration"
+		basePath="/v1" />
+	<ws:consumer-config name="WS_Consumer_Weather"
+		wsdlLocation="global-weather.wsdl" service="GlobalWeather" port="GlobalWeatherSoap"
+		serviceAddress="${wsdl.weatherapp.url}" doc:name="Web Service Consumer" />
+	<ws:consumer-config name="WS_Consumer_Cities"
+		wsdlLocation="global-weather.wsdl" service="GlobalWeather" port="GlobalWeatherSoap"
+		serviceAddress="${wsdl.weatherapp.url}" doc:name="Web Service Consumer" />
+</mule>

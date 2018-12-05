@@ -1,0 +1,6 @@
+{
+   "type": "System Error",
+   "status": "400",
+   "statusCode": "Bad request",
+   "message": "Unable to process the request."
+}

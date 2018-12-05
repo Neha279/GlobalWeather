@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><GetWeatherResponse xmlns="http://www.webserviceX.NET" xmlns:tns="http://www.webserviceX.NET" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">&lt;![CDATA[&amp;lt;NewDataSet&amp;gt;
+    &amp;lt;Location&amp;gt;Melbourne&amp;lt;/Location&amp;gt;
+    &amp;lt;Time&amp;gt;11 AM&amp;lt;/Time&amp;gt;
+    &amp;lt;Wind&amp;gt;15 km per hour&amp;lt;/Wind&amp;gt;
+    &amp;lt;Visibility&amp;gt;10 km&amp;lt;/Visibility&amp;gt;
+    &amp;lt;SkyConditions&amp;gt;sunny&amp;lt;/SkyConditions&amp;gt;
+    &amp;lt;Temperature&amp;gt;18&amp;lt;/Temperature&amp;gt;
+    &amp;lt;DewPoint&amp;gt;2 C&amp;lt;/DewPoint&amp;gt;
+    &amp;lt;RelativeHumidity&amp;gt;35&amp;lt;/RelativeHumidity&amp;gt;
+    &amp;lt;Status&amp;gt;Normal&amp;lt;/Status&amp;gt;
+&amp;lt;/NewDataSet&amp;gt;]]&gt;
+</GetWeatherResponse>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:mock="http://www.mulesoft.org/schema/mule/mock" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:core="http://www.mulesoft.org/schema/mule/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/mock http://www.mulesoft.org/schema/mule/mock/current/mule-mock.xsd">
+    <munit:config name="munit" doc:name="MUnit configuration"/>
+    <spring:beans>
+        <spring:import resource="classpath:implementation/get_city_by_country.xml"/>
+        <spring:import resource="classpath:global/global.xml"/>
+        <spring:import resource="classpath:common/common.xml"/>
+    </spring:beans>
+    <munit:test name="get_city_by_country-test-suite-sf_get_cityFlow_requestTest" description="Test">
+        <mock:when messageProcessor=".*:.*" doc:name="Mock Webservice">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['Invoke Global Weather Call']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[getResource('sample_data/GetCitiesByCountryResponse_1.xml').asString]"/>
+        </mock:when>
+        <mock:when messageProcessor=".*:.*" doc:name="Mock Flow">
+            <mock:with-attributes>
+                <mock:with-attribute name="name" whereValue="#[matchContains('sf_get_cityFlow_response')]"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#['Success']"/>
+        </mock:when>
+        <munit:set payload="#[]" doc:name="Set Message">
+            <munit:inbound-properties>
+                <munit:inbound-property key="'http.query.params'.country" value="Australia"/>
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="sf_get_cityFlow_request" doc:name="Flow-ref to sf_get_cityFlow_request"/>
+    </munit:test>
+</mule>

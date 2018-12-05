@@ -1,0 +1,11 @@
+{
+    "inputMessageMetadata": {
+        "messagePayload": {},
+        "flowVariables": {
+            "qpCity": {}
+        }
+    },
+    "outputMessageMetadata": {},
+    "id": "aa019d34-59e0-49e7-899a-bcdca69f8aa9",
+    "version": "5.2.0.0"
+}

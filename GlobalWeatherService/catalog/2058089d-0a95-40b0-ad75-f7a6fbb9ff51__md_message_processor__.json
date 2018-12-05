@@ -1,0 +1,16 @@
+{
+    "inputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "#_custom_mule_metadata_type_#",
+            "typeId": "getWeatherRsp_xml"
+        }
+    },
+    "outputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "#_custom_mule_metadata_type_#",
+            "typeId": "getWeatherRsp_json"
+        }
+    },
+    "id": "2058089d-0a95-40b0-ad75-f7a6fbb9ff51",
+    "version": "5.2.0.0"
+}

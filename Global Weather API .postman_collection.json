@@ -1,0 +1,101 @@
+{
+	"info": {
+		"_postman_id": "7f372596-58c9-4d4a-97ca-91688c528429",
+		"name": "Global Weather API ",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "http://127.0.0.1:8085/v1/weather?country=Australia&city=Melbourne",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8085/v1/weather?country=Australia&city=Melbourne",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8085",
+					"path": [
+						"v1",
+						"weather"
+					],
+					"query": [
+						{
+							"key": "country",
+							"value": "Australia"
+						},
+						{
+							"key": "city",
+							"value": "Melbourne"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://127.0.0.1:8085/v1/city?country=Australia",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8085/v1/city?country=Australia",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8085",
+					"path": [
+						"v1",
+						"city"
+					],
+					"query": [
+						{
+							"key": "country",
+							"value": "Australia"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "b7261a24-771e-41e8-a865-10710332a7ac",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "1ec5ed00-ac44-4258-925d-5ea2ebb2827e",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

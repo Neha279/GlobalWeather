@@ -1,0 +1,6 @@
+{
+   "type": "Business Exception",
+   "status": "422",
+   "statusCode": "No Data Found",
+   "message": "No Weather Information Found."
+}

@@ -1,0 +1,10 @@
+{
+    "inputMessageMetadata": {
+        "flowVariables": {
+            "qpCity": {}
+        }
+    },
+    "outputMessageMetadata": {},
+    "id": "ca935b19-5573-4988-b934-3090459033bc",
+    "version": "5.2.0.0"
+}

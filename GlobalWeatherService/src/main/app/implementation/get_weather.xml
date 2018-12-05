@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+	xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata"
+	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
+	xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd">
+	<sub-flow name="sf_get_weather_request">
+		<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.qpCity= message.inboundProperties.'http.query.params'.city;
+flowVars.qpCountry= message.inboundProperties.'http.query.params'.country;]]></expression-component>
+		<dw:transform-message doc:name="Generate Request Message"
+			metadata:id="aa019d34-59e0-49e7-899a-bcdca69f8aa9">
+			<dw:input-payload />
+			<dw:input-variable mimeType="application/java"
+				variableName="qpCity" />
+			<dw:set-payload><![CDATA[%dw 1.0
+%output application/xml
+%namespace ns0 http://www.webserviceX.NET
+---
+{
+	ns0#GetWeather: {
+		ns0#CityName: inboundProperties."http.query.params".city as :number,
+		ns0#CountryName: inboundProperties."http.query.params".country
+	}
+}]]></dw:set-payload>
+		</dw:transform-message>
+		<logger
+			message="#[flowVars.LogMsg + &quot;\nRequest Message (Transformed): \n&quot; + payload]"
+			level="INFO" doc:name="Log Transform Request Message" />
+		<ws:consumer config-ref="WS_Consumer_Weather" operation="GetWeather"
+			doc:name="Invoke Global Weather Call" />
+
+		<logger
+			message="#[flowVars.LogMsg + &quot;\nResponse Message (RAW): \n&quot;+ message.payloadAs(java.lang.String)]"
+			level="INFO" doc:name="Log Raw Response" />
+		<choice doc:name="Check Data Found">
+			<when expression="#[payload=='']">
+				<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.statusCode="No Data Found";
+flowVars.exceptionMsg="No Weather Information Found.";]]></expression-component>
+				<flow-ref name="sf_commonBusinessException" doc:name="Raise Business Exception" />
+
+			</when>
+			<otherwise>
+				<flow-ref name="sf_get_weather_response" doc:name="Generate Response Message" />
+			</otherwise>
+		</choice>
+
+	</sub-flow>
+	<sub-flow name="sf_get_weather_response">
+		<dw:transform-message doc:name="Generate Response (String)">
+			<dw:input-payload doc:sample="sample_data\GetWeatherResponse_3.xml" />
+			<dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+%namespace ns0 http://www.webserviceX.NET
+
+---
+trim payload.GetWeatherResponse]]></dw:set-payload>
+		</dw:transform-message>
+		<expression-component doc:name="Replace Values"><![CDATA[payload=payload.replaceAll("<!\\[CDATA\\[", "");
+payload=payload.replaceAll("\\]\\]>", "");
+payload=payload.replaceAll("\\<\\!\\[CDATA\\[", "");
+payload=payload.replaceAll("\\]\\]\\>", "");
+payload=payload.replaceAll("&lt\\;", "<");
+payload=payload.replaceAll("&gt\\;", ">");
+payload=payload.replaceAll("&amp\\;lt\\;", "<");
+payload=payload.replaceAll("&amp\\;gt\\;", ">");]]></expression-component>
+
+		<mulexml:dom-to-xml-transformer
+			mimeType="application/xml" doc:name="DOM to XML" />
+		<dw:transform-message doc:name="Transform Message"
+			metadata:id="58c4db5e-c324-42e5-a800-14108edec996">
+			<dw:input-payload mimeType="application/xml"
+				doc:sample="C:\Development\Temp\getweather_example_response.xml" />
+			<dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+%namespace ns0 http://www.webserviceX.NET
+---
+{
+	city: payload.NewDataSet.Location,
+	time: payload.NewDataSet.Time,
+	wind: payload.NewDataSet.Wind,
+	visibility: payload.NewDataSet.Visibility,
+	skyConditions: payload.NewDataSet.SkyConditions,
+	temperature: payload.NewDataSet.Temperature as :string,
+	dewPoint: payload.NewDataSet.DewPoint,
+	relativeHumidity: payload.NewDataSet.RelativeHumidity as :string,
+	weatherStatus: payload.NewDataSet.Status
+}]]></dw:set-payload>
+		</dw:transform-message>
+		<logger level="INFO" doc:name="Log Transformed Response Message"
+			message="#[flowVars.LogMsg + &quot;\nResponse Message (Transformed): \n&quot; + payload]" />
+	</sub-flow>
+</mule>

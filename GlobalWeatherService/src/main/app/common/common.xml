@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata"
+	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd">
+	<sub-flow name="sf_commonFlowLogRequest">
+		<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.LogID=message.id;
+//flowVars.TargetURL=message.inboundProperties.'http.scheme' + message.inboundProperties.'http.listener.path' + message.inboundProperties.'http.request.path';
+flowVars.TargetURL=message.inboundProperties.'http.scheme' + "://" + message.inboundProperties.host + message.inboundProperties.'http.request.path';
+
+// Set the Request Log Msg
+flowVars.LogMsg="\nPath Address: " + flowVars.TargetURL + " - Correlation ID: " + flowVars.LogID + " - Remote Address: " + message.inboundProperties.'http.remote.address';]]></expression-component>
+		<logger message="#[flowVars.LogMsg + &quot;\nRequest Received&quot;]"
+			level="INFO" doc:name="Log Request" />
+	</sub-flow>
+	<sub-flow name="sf_commonErrorHandling">
+		<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.additionalInfo=exception.getMessage();]]></expression-component>
+		<dw:transform-message doc:name="Generate Generic Error Message">
+			<dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	type: "System Error",
+	status: flowVars.status,
+	statusCode: flowVars.statusCode,
+	message: flowVars.exceptionMsg
+}]]></dw:set-payload>
+		</dw:transform-message>
+	</sub-flow>
+	<sub-flow name="sf_commonBusinessException">
+		<dw:transform-message doc:name="Business Exception">
+			<dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+   "type": "Business Exception",
+   "status": "422",
+	statusCode: flowVars.statusCode,
+	message: flowVars.exceptionMsg
+}]]></dw:set-payload>
+		</dw:transform-message>
+		<set-property propertyName="http.status" value="422"
+			doc:name="Property" />
+	</sub-flow>
+</mule>

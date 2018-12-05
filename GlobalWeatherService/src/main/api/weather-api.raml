@@ -1,0 +1,129 @@
+#%RAML 1.0
+title: Weather API
+version: v1
+baseUri: https://localhost:8080/{version}
+description: This API Specification provides Weather Information. 
+mediaType: application/json
+protocols: [ HTTP, HTTPS ]
+
+types:
+  Error:
+    properties:
+      type:
+       description: Type of error raised
+       type: string
+       enum: [System Error, Business Exception]
+      status: 
+        description: Http Status error Code
+        type: string 
+      statusCode: 
+        description: Readable Name of Error
+      message: 
+        description: Additional Information of the error 
+/weather:
+    displayName: Weather
+    get:
+      description: Retrieve weather information for all major cities around the world.
+      queryParameters: 
+          country: 
+            description: A named country to retrieve weather for.
+            example: Australia
+            type: string
+            required: false
+          city: 
+            description: A city location to retrieve weather for.
+            example: Melbourne
+            type: string
+            required: false
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/getweather_example_response.json
+              schema: !include schema/getweather_schema_response.json
+        400:
+          body:
+            application/json:
+              type: Error
+              example: !include examples/error_message_400.json
+        404:
+          body:
+            application/json:
+              type: Error
+              example: !include examples/error_message_404.json
+        405:
+          body:
+            application/json:
+              type: Error
+              example: !include examples/error_message_405.json
+        406:
+          body:
+            application/json:
+              type: Error
+              example: !include examples/error_message_406.json 
+        415:
+          body:
+            application/json:
+              type: Error
+              example: !include examples/error_message_415.json
+        422:
+          body:
+            application/json:
+              type: Error
+              example: !include examples/error_message_422.json        
+        500:
+          body:
+            application/json:
+              type: Error
+              example: !include examples/error_message_500.json
+/city:
+  displayName: Cities
+  get: 
+    description: Retrieve all major cities for a given country.
+    queryParameters: 
+          country: 
+            description: A named country to retrieve weather for.
+            example: Australia
+            type: string
+            required: true
+    responses:
+      200: 
+        body:
+          application/json:
+            example: !include examples/getcity_example_response.json
+            schema: !include schema/getcity_schema_response.json
+      400:
+        body:
+          application/json:
+            type: Error
+            example: !include examples/error_message_400.json
+      404:
+        body:
+          application/json:
+            type: Error
+            example: !include examples/error_message_404.json
+      405:
+        body:
+          application/json:
+            type: Error
+            example: !include examples/error_message_405.json
+      406:
+        body:
+          application/json:
+            type: Error
+            example: !include examples/error_message_406.json
+      415:
+        body:
+          application/json:
+            type: Error
+            example: !include examples/error_message_415.json
+      422:
+        body:
+          application/json:
+            type: Error
+            example: !include examples/error_message_422.json      
+      500:
+        body:
+          application/json:
+            type: Error
+            example: !include examples/error_message_500.json

@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:GetWeatherResponse xmlns:ns0="http://www.webserviceX.NET">
+  <ns0:GetWeatherResult>    <Location>Melbourne</Location>
+    <Time>11 AM</Time>
+    <Wind>15 km per hour</Wind>
+    <Visibility>10 km</Visibility>
+    <SkyConditions>sunny</SkyConditions>
+    <Temperature>18</Temperature>
+    <DewPoint>2 C</DewPoint>
+    <RelativeHumidity>35</RelativeHumidity>
+    <Status>Normal</Status></ns0:GetWeatherResult>
+</ns0:GetWeatherResponse>

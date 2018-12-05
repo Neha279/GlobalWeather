@@ -1,0 +1,16 @@
+{
+    "inputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "Web_Service_Consumer",
+            "typeId": "GetWeatherResponse"
+        }
+    },
+    "outputMessageMetadata": {
+        "messagePayload": {
+            "connectorName": "Web_Service_Consumer",
+            "typeId": "GetWeatherResponse"
+        }
+    },
+    "id": "700b887a-f2d1-48e4-bb53-a97e155f9a36",
+    "version": "5.2.0.0"
+}

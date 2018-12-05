@@ -1,0 +1,6 @@
+{
+   "type": "System Error",
+   "status": "405",
+   "statusCode": "Method not allowed",
+   "message": "The request method 'GET' is not supported for the requested resource."
+}
