@@ -7,8 +7,8 @@ Added the node server JS to mock wsdl getWeather serivces.
 
 # Steps to run 
 
-npm install
-npm start 
+1) npm install
+2) npm start 
 
 
 
