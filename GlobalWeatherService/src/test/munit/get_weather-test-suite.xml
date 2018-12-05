@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:mock="http://www.mulesoft.org/schema/mule/mock"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:core="http://www.mulesoft.org/schema/mule/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/mock http://www.mulesoft.org/schema/mule/mock/current/mule-mock.xsd
+http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+    <munit:config name="munit" doc:name="MUnit configuration"/>
+    <spring:beans>
+        <spring:import resource="classpath:implementation/get_weather.xml"/>
+        <spring:import resource="classpath:global/global.xml"/>
+        <spring:import resource="classpath:common/common.xml"/>
+        <spring:import resource="classpath:global/global-exception.xml"/>
+    </spring:beans>
+    <munit:test name="get_weather-test-suite-sf_get_weather_requestTest" description="Test">
+         <mock:when messageProcessor=".*:.*" doc:name="Mock Webservice">
+            <mock:with-attributes>
+                <mock:with-attribute name="doc:name" whereValue="#['Invoke Global Weather Call']"/>
+            </mock:with-attributes>
+            <mock:then-return payload="#[getResource('./sample_data/GetWeatherResponse_3.xml').asString()]" mimeType="application/xml"/>
+        </mock:when>
+        <munit:set payload="#[]" doc:name="Set Message">
+            <munit:inbound-properties>
+      
+                <munit:inbound-property key="http.query.params" value="#[['country':'Australia', 'city' : 'Melbourne']]"/>
+                
+            </munit:inbound-properties>
+        </munit:set>
+        <flow-ref name="sf_get_weather_flow" doc:name="sf_get_weather_flow"/>
+        <json:validate-schema schemaLocation="json_schema/getweather_schema_response.json" doc:name="Validate JSON Schema"/>
+    </munit:test>
+</mule>

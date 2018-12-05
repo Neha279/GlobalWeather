@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+<mule xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:cluster="http://www.mulesoft.org/schema/mule/ee/cluster" xmlns:objectstore="http://www.mulesoft.org/schema/mule/objectstore"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
 	xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns:context="http://www.springframework.org/schema/context"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/objectstore http://www.mulesoft.org/schema/mule/objectstore/current/mule-objectstore.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
@@ -20,4 +24,8 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 	<ws:consumer-config name="WS_Consumer_Cities"
 		wsdlLocation="global-weather.wsdl" service="GlobalWeather" port="GlobalWeatherSoap"
 		serviceAddress="${wsdl.weatherapp.url}" doc:name="Web Service Consumer" />
+    <configuration defaultExceptionStrategy-ref="apiKitGlobalExceptionMapping" defaultProcessingStrategy="non-blocking" doc:name="Configuration">
+        <http:config useTransportForUris="false"/>
+    </configuration>
+		
 </mule>

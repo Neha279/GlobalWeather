@@ -14,7 +14,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 		<http:listener config-ref="weather-api-httpListenerConfig"
 			path="/*" doc:name="HTTP" allowedMethods="GET" />
 		<apikit:router config-ref="weather-api-config" doc:name="APIkit Router" />
-		<exception-strategy ref="weather-api-apiKitGlobalExceptionMapping"
+		<exception-strategy ref="apiKitGlobalExceptionMapping"
 			doc:name="Reference Exception Strategy" />
 	</flow>
 	<flow name="weather-api-console">
@@ -24,73 +24,11 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 			doc:name="APIkit Console" />
 	</flow>
 	<flow name="get:/weather:weather-api-config">
-		<flow-ref name="sf_commonFlowLogRequest" doc:name="Log Request" />
-		<flow-ref name="sf_get_weather_request" doc:name="Get Weather Results" />
+		<flow-ref name="sf_commonFlowLogRequest" doc:name="sf_commonFlowLogRequest" />
+		<flow-ref name="sf_get_weather_flow" doc:name="sf_get_weather_flow" />
 	</flow>
 	<flow name="get:/city:weather-api-config">
-		<flow-ref name="sf_commonFlowLogRequest" doc:name="Log Request" />
-		<flow-ref name="sf_get_cityFlow_request" doc:name="Get City Results" />
+		<flow-ref name="sf_commonFlowLogRequest" doc:name="sf_commonFlowLogRequest" />
+		<flow-ref name="sf_get_city_by_country_Flow" doc:name="sf_get_city_by_country_Flow" />
 	</flow>
-	<apikit:mapping-exception-strategy
-		name="weather-api-apiKitGlobalExceptionMapping">
-		<apikit:mapping statusCode="400">
-			<apikit:exception
-				value="org.mule.module.apikit.exception.BadRequestException" />
-			<set-property propertyName="Content-Type" value="application/json"
-				doc:name="Property" />
-			<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.status="400";
-flowVars.statusCode="Bad request";
-flowVars.exceptionMsg="Unable to process the request.";]]></expression-component>
-			<flow-ref name="sf_commonErrorHandling" doc:name="Common Error Logging" />
-		</apikit:mapping>
-		<apikit:mapping statusCode="404">
-			<apikit:exception
-				value="org.mule.module.apikit.exception.NotFoundException" />
-			<set-property propertyName="Content-Type" value="application/json"
-				doc:name="Property" />
-			<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.status="404";
-flowVars.statusCode="Resource Not Found";
-flowVars.exceptionMsg="The requested resource '" + message.inboundProperties.'http.request.path' + "' was not found using the API method '" + message.inboundProperties.'http.method';]]></expression-component>
-			<flow-ref name="sf_commonErrorHandling" doc:name="Common Error Logging" />
-		</apikit:mapping>
-		<apikit:mapping statusCode="405">
-			<apikit:exception
-				value="org.mule.module.apikit.exception.MethodNotAllowedException" />
-			<set-property propertyName="Content-Type" value="application/json"
-				doc:name="Property" />
-			<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.status="405";
-flowVars.statusCode="Method not allowed";
-flowVars.exceptionMsg="The request method '" + message.inboundProperties.'http.method' + "' is not supported for the requested resource.";]]></expression-component>
-			<flow-ref name="sf_commonErrorHandling" doc:name="Common Error Logging" />
-		</apikit:mapping>
-		<apikit:mapping statusCode="406">
-			<apikit:exception
-				value="org.mule.module.apikit.exception.NotAcceptableException" />
-			<set-property propertyName="Content-Type" value="application/json"
-				doc:name="Property" />
-			<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.status="406";
-flowVars.statusCode="Not acceptable";
-flowVars.exceptionMsg="The requested format in the Accept headers is not acceptable.";]]></expression-component>
-			<flow-ref name="sf_commonErrorHandling" doc:name="Common Error Logging" />
-		</apikit:mapping>
-		<apikit:mapping statusCode="415">
-			<apikit:exception
-				value="org.mule.module.apikit.exception.UnsupportedMediaTypeException" />
-			<set-property propertyName="Content-Type" value="application/json"
-				doc:name="Property" />
-			<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.status="415";
-flowVars.statusCode="Unsupported media type";
-flowVars.exceptionMsg="The request has a media type that is not supported.";]]></expression-component>
-			<flow-ref name="sf_commonErrorHandling" doc:name="Common Error Logging" />
-		</apikit:mapping>
-		<apikit:mapping statusCode="500">
-			<apikit:exception value="java.lang.Exception" />
-			<set-property propertyName="Content-Type" value="application/json"
-				doc:name="Property" />
-			<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.status="500";
-flowVars.statusCode="Internal Server Error";
-flowVars.exceptionMsg="Try again later.";]]></expression-component>
-			<flow-ref name="sf_commonErrorHandling" doc:name="Common Error Logging" />
-		</apikit:mapping>
-	</apikit:mapping-exception-strategy>
 </mule>

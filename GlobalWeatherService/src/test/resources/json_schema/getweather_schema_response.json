@@ -1,0 +1,33 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"type": "object",
+	"properties": {
+		"city": {
+			"type": "string"
+		},
+		"time": {
+			"type": "string"
+		},
+		"wind": {
+			"type": "string"
+		},
+		"visibility": {
+			"type": "string"
+		},
+		"skyConditions": {
+			"type": "string"
+		},
+		"temperature": {
+			"type": "string"
+		},
+		"dewPoint": {
+			"type": "string"
+		},
+		"relativeHumidity": {
+			"type": "string"
+		},
+		"weatherStatus": {
+			"type": "string"
+		}
+	}
+}

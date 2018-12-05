@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<mule xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" version="EE-3.8.3"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+<apikit:mapping-exception-strategy
+		name="apiKitGlobalExceptionMapping">
+		<apikit:mapping statusCode="400">
+			<apikit:exception
+				value="org.mule.module.apikit.exception.BadRequestException" />
+			<set-property propertyName="Content-Type" value="application/json"
+				doc:name="Property" />
+			<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.status="400";
+flowVars.statusCode="Bad request";
+flowVars.exceptionMsg=exception.getMessage();]]></expression-component>
+			<flow-ref name="sf_commonErrorHandling" doc:name="sf_commonErrorHandling" />
+		</apikit:mapping>
+		<apikit:mapping statusCode="404">
+			<apikit:exception
+				value="org.mule.module.apikit.exception.NotFoundException" />
+			<set-property propertyName="Content-Type" value="application/json"
+				doc:name="Property" />
+			<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.status="404";
+flowVars.statusCode="Resource Not Found";
+flowVars.exceptionMsg="The requested resource '" + message.inboundProperties.'http.request.path' + "' was not found using the API method '" + message.inboundProperties.'http.method';]]></expression-component>
+			<flow-ref name="sf_commonErrorHandling" doc:name="sf_commonErrorHandling" />
+		</apikit:mapping>
+		<apikit:mapping statusCode="405">
+			<apikit:exception
+				value="org.mule.module.apikit.exception.MethodNotAllowedException" />
+			<set-property propertyName="Content-Type" value="application/json"
+				doc:name="Property" />
+			<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.status="405";
+flowVars.statusCode="Method not allowed";
+flowVars.exceptionMsg="The request method '" + message.inboundProperties.'http.method' + "' is not supported for the requested resource.";]]></expression-component>
+			<flow-ref name="sf_commonErrorHandling" doc:name="sf_commonErrorHandling" />
+		</apikit:mapping>
+		<apikit:mapping statusCode="406">
+			<apikit:exception
+				value="org.mule.module.apikit.exception.NotAcceptableException" />
+			<set-property propertyName="Content-Type" value="application/json"
+				doc:name="Property" />
+			<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.status="406";
+flowVars.statusCode="Not acceptable";
+flowVars.exceptionMsg="The requested format in the Accept headers is not acceptable.";]]></expression-component>
+			<flow-ref name="sf_commonErrorHandling" doc:name="sf_commonErrorHandling" />
+		</apikit:mapping>
+		<apikit:mapping statusCode="415">
+			<apikit:exception
+				value="org.mule.module.apikit.exception.UnsupportedMediaTypeException" />
+			<set-property propertyName="Content-Type" value="application/json"
+				doc:name="Property" />
+			<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.status="415";
+flowVars.statusCode="Unsupported media type";
+flowVars.exceptionMsg="The request has a media type that is not supported.";]]></expression-component>
+			<flow-ref name="sf_commonErrorHandling" doc:name="sf_commonErrorHandling" />
+		</apikit:mapping>
+		<apikit:mapping statusCode="500">
+			<apikit:exception value="java.lang.Exception" />
+			<set-property propertyName="Content-Type" value="application/json"
+				doc:name="Property" />
+			<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.status="500";
+flowVars.statusCode="Internal Server Error";
+flowVars.exceptionMsg="Try again later.";]]></expression-component>
+			<flow-ref name="sf_commonErrorHandling" doc:name="sf_commonErrorHandling" />
+		</apikit:mapping>
+	</apikit:mapping-exception-strategy>
+
+</mule>

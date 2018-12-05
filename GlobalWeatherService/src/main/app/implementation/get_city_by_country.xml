@@ -1,21 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:json="http://www.mulesoft.org/schema/mule/json"
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:json="http://www.mulesoft.org/schema/mule/json"
 	xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
 	xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata"
 	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
 	xmlns:ws="http://www.mulesoft.org/schema/mule/ws" xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:objectstore="http://www.mulesoft.org/schema/mule/objectstore"
 	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/current/mule-ws.xsd
 http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
 http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
 http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
-http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd">
-	<sub-flow name="sf_get_cityFlow_request">
-		<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.qpCountry=message.inboundProperties.'http.query.params'.country;]]></expression-component>
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd
+http://www.mulesoft.org/schema/mule/objectstore http://www.mulesoft.org/schema/mule/objectstore/current/mule-objectstore.xsd">
+    <sub-flow name="sf_get_city_by_country_Flow">
+        <expression-component doc:name="Initialise Variables"><![CDATA[flowVars.qpCountry=message.inboundProperties.'http.query.params'.country;]]></expression-component>
+        <validation:is-not-empty message="Invalid Country" exceptionClass="org.mule.module.apikit.exception.BadRequestException" value="#[flowVars.qpCountry.trim()]" doc:name="Country Validation"/>
+        <flow-ref name="sf_get_cityFlow_request" doc:name="sf_get_cityFlow_request"/>
+    </sub-flow>
+	<flow name="sf_get_cityFlow_request">
+		
 		<dw:transform-message doc:name="Generate Request Message">
 			<dw:set-payload><![CDATA[%dw 1.0
 %output application/xml
@@ -30,7 +39,7 @@ http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/
 		<logger
 			message="#[flowVars.LogMsg + &quot;\nRequest Message (Transformed): \n&quot; + payload]"
 			level="INFO" doc:name="Log Transform Request Message" />
-        <until-successful maxRetries="5"  doc:name="Retry 5 times" >
+        <until-successful maxRetries="3"  doc:name="Retry 3 times"  failureExpression="#[message.payloadAs(java.lang.String).equals(&quot;&quot;)]" synchronous="true" millisBetweenRetries="10000">
             <ws:consumer config-ref="WS_Consumer_Cities" operation="GetCitiesByCountry" doc:name="Invoke Global Weather Call"/>
         </until-successful>
 		<logger
@@ -40,18 +49,26 @@ http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/
 			<when expression="#[payload=='']">
 				<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.statusCode="No Data Found";
 flowVars.exceptionMsg="No Cities Found.";]]></expression-component>
-				<flow-ref name="sf_commonBusinessException" doc:name="Raise Business Exception" />
+				<flow-ref name="sf_commonBusinessException" doc:name="sf_commonBusinessException" />
 
 			</when>
 			<otherwise>
-				<flow-ref name="sf_get_cityFlow_response" doc:name="Generate Response Message" />
+				<flow-ref name="sf_get_cityFlow_response" doc:name="sf_get_cityFlow_response" />
 			</otherwise>
 		</choice>
+        <catch-exception-strategy doc:name="Catch Exception Strategy"> 
+        <logger message="In Exception Handler flow:   #[exception] --&gt;  #[exception.getCauseException().getMessage()]" level="INFO" doc:name="Logger"/>
+        <set-variable variableName="exceptionMsg" value="#[exception.getMessage()]" doc:name="Variable exceptionMsg"/>
+            <set-variable variableName="status" value="Failed" doc:name="Variable http status"/>
+            <set-variable variableName="statusCode" value="500" doc:name="Variable status code"/>
+            <flow-ref name="sf_commonErrorHandling" doc:name="sf_commonErrorHandling"/>
+            
+        </catch-exception-strategy>
 
-	</sub-flow>
+	</flow>
 	<sub-flow name="sf_get_cityFlow_response">
 		<dw:transform-message doc:name="Extract Response">
-			<dw:input-payload doc:sample="sample_data\GetCitiesByCountryResponse.xml" />
+		    <dw:input-payload doc:sample="payload" />
 			<dw:set-payload><![CDATA[%dw 1.0
 %output application/java
 %namespace ns0 http://www.webserviceX.NET
@@ -78,7 +95,7 @@ payload=payload.replaceAll("&amp\\;gt\\;", ">");]]></expression-component>
 ---
 { 
 	cities: payload.NewDataSet.*Table.City,
-  count: sizeOf-payload.NewDataSet.*Table.City
+     count: sizeOf (payload.NewDataSet.*Table.City)
   
 }
 ]]></dw:set-payload>

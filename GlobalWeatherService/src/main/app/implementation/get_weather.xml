@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:json="http://www.mulesoft.org/schema/mule/json"
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:jetty="http://www.mulesoft.org/schema/mule/jetty" xmlns:json="http://www.mulesoft.org/schema/mule/json"
 	xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
 	xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata"
 	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
@@ -12,10 +12,17 @@ http://www.mulesoft.org/schema/mule/ws http://www.mulesoft.org/schema/mule/ws/cu
 http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
 http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
 http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
-http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd">
-	<sub-flow name="sf_get_weather_request">
-		<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.qpCity= message.inboundProperties.'http.query.params'.city;
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd
+http://www.mulesoft.org/schema/mule/jetty http://www.mulesoft.org/schema/mule/jetty/current/mule-jetty.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+    <sub-flow name="sf_get_weather_flow">
+        <expression-component doc:name="Initialise Variables"><![CDATA[flowVars.qpCity= message.inboundProperties.'http.query.params'.city;
 flowVars.qpCountry= message.inboundProperties.'http.query.params'.country;]]></expression-component>
+        <validation:is-not-empty message="Invalid City" exceptionClass="org.mule.module.apikit.exception.BadRequestException" value="#[flowVars.qpCity.trim()]" doc:name="City Validation"/>
+        <validation:is-not-empty message="Invalid Country" exceptionClass="org.mule.module.apikit.exception.BadRequestException" value="#[flowVars.qpCountry.trim()]" doc:name="Country Validation"/>
+        <flow-ref name="sf_get_weather_request" doc:name="sf_get_weather_request"/>
+    </sub-flow>
+	<flow name="sf_get_weather_request">
 		<dw:transform-message doc:name="Generate Request Message"
 			metadata:id="aa019d34-59e0-49e7-899a-bcdca69f8aa9">
 			<dw:input-payload />
@@ -27,16 +34,18 @@ flowVars.qpCountry= message.inboundProperties.'http.query.params'.country;]]></e
 ---
 {
 	ns0#GetWeather: {
-		ns0#CityName: inboundProperties."http.query.params".city as :number,
-		ns0#CountryName: inboundProperties."http.query.params".country
+		ns0#CityName: flowVars.qpCity ,
+		ns0#CountryName: flowVars.qpCountry
 	}
 }]]></dw:set-payload>
 		</dw:transform-message>
 		<logger
 			message="#[flowVars.LogMsg + &quot;\nRequest Message (Transformed): \n&quot; + payload]"
 			level="INFO" doc:name="Log Transform Request Message" />
-		<ws:consumer config-ref="WS_Consumer_Weather" operation="GetWeather"
-			doc:name="Invoke Global Weather Call" />
+        <until-successful maxRetries="3" doc:name="Retry 3 times" synchronous="true" failureExpression="#[message.payloadAs(java.lang.String).equals(&quot;&quot;)]" millisBetweenRetries="10000">
+            <ws:consumer config-ref="WS_Consumer_Weather" operation="GetWeather" doc:name="Invoke Global Weather Call"/>
+        </until-successful>
+
 
 		<logger
 			message="#[flowVars.LogMsg + &quot;\nResponse Message (RAW): \n&quot;+ message.payloadAs(java.lang.String)]"
@@ -45,25 +54,35 @@ flowVars.qpCountry= message.inboundProperties.'http.query.params'.country;]]></e
 			<when expression="#[payload=='']">
 				<expression-component doc:name="Initialise Variables"><![CDATA[flowVars.statusCode="No Data Found";
 flowVars.exceptionMsg="No Weather Information Found.";]]></expression-component>
-				<flow-ref name="sf_commonBusinessException" doc:name="Raise Business Exception" />
+				<flow-ref name="sf_commonBusinessException" doc:name="sf_commonBusinessException" />
 
 			</when>
 			<otherwise>
-				<flow-ref name="sf_get_weather_response" doc:name="Generate Response Message" />
+				<flow-ref name="sf_get_weather_response" doc:name="sf_get_weather_response" />
 			</otherwise>
 		</choice>
+		 <catch-exception-strategy doc:name="Catch Exception Strategy"> 
+        <logger message="In Exception Handler flow:   #[exception] --&gt;  #[exception.getCauseException().getMessage()]" level="INFO" doc:name="Logger"/>
+        <set-variable variableName="exceptionMsg" value="#[exception.getMessage()]" doc:name="Variable exceptionMsg"/>
+            <set-variable variableName="status" value="Failed" doc:name="Variable http status"/>
+            <set-variable variableName="statusCode" value="500" doc:name="Variable status code"/>
+            <flow-ref name="sf_commonErrorHandling" doc:name="sf_commonErrorHandling"/>
+            
+        </catch-exception-strategy>
 
-	</sub-flow>
+	</flow>
 	<sub-flow name="sf_get_weather_response">
 		<dw:transform-message doc:name="Generate Response (String)">
-			<dw:input-payload doc:sample="sample_data\GetWeatherResponse_3.xml" />
+			<dw:input-payload doc:sample="payload" />
 			<dw:set-payload><![CDATA[%dw 1.0
+%input payload application/xml
 %output application/java
 %namespace ns0 http://www.webserviceX.NET
 
 ---
-trim payload.GetWeatherResponse]]></dw:set-payload>
+payload.GetWeatherResponse]]></dw:set-payload>
 		</dw:transform-message>
+        <logger message="#[message.payloadAs(java.lang.String)]" level="INFO" doc:name="Logger"/>
 		<expression-component doc:name="Replace Values"><![CDATA[payload=payload.replaceAll("<!\\[CDATA\\[", "");
 payload=payload.replaceAll("\\]\\]>", "");
 payload=payload.replaceAll("\\<\\!\\[CDATA\\[", "");
@@ -98,4 +117,5 @@ payload=payload.replaceAll("&amp\\;gt\\;", ">");]]></expression-component>
 		<logger level="INFO" doc:name="Log Transformed Response Message"
 			message="#[flowVars.LogMsg + &quot;\nResponse Message (Transformed): \n&quot; + payload]" />
 	</sub-flow>
+   
 </mule>
