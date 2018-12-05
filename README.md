@@ -1,14 +1,20 @@
-# ops-technical-activity
+# Global Weather API Adapter
  
-This adapter has errors at compile time, run-time and in the munit test case. Work through the errors you can find, documenting the issue/exception and the actions you have taken to fix it (This can be done as git commit messages if you chose).
+This adapter is global weather api. Which is consuming the weather soap serivce.
 
-Included with the adapter is a dockerised mock endpoint that can be used for testing. If you choose to make any changes to this mock, you may document them alongside the exceptions, explaining your reasoning.
+Mule Project
 
-Extension Task Suggestions - Enhance the application:
+1 Open the project inside the Anypoint
+2 Runt he application. 
+3 localhost:8085 its open the API
 
-1. Create Unit test cases for get_weather.xml flow
-2. Enhance Unit test cases for get_city_by_country_test_suite.xml
-3. Build Exception Handling into the application to handle errors - Specifically, global exception handling for the Get Weather and Get City by Country flows
-4. Add retry mechanisms on top of the exception handling (this weather service has been known to be flakey and this could help with the conenctivity issues)
-5. Write documentation explaining the operation and purpose of the API and flows.
+Mock soap Server
+
+1 Node Soap mock server 
+2 Run - npm install and npm start to run server 
+3 Mocking sopa services
+
+Test URL's
+http://127.0.0.1:8085/v1/weather?country=Australia&city=Melbourne
+http://127.0.0.1:8085/v1/city?country=Australia
 
